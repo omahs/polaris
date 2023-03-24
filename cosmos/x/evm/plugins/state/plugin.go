@@ -28,7 +28,9 @@ import (
 	storetypes "cosmossdk.io/store/types"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/ethereum/go-ethereum/core/rawdb"
 
+	cosmosrawdb "pkg.berachain.dev/polaris/cosmos/store/rawdb"
 	"pkg.berachain.dev/polaris/cosmos/store/snapmulti"
 	"pkg.berachain.dev/polaris/cosmos/x/evm/plugins"
 	"pkg.berachain.dev/polaris/cosmos/x/evm/plugins/state/events"
@@ -348,12 +350,7 @@ func (p *plugin) GetCodeHash(addr common.Address) common.Hash {
 // GetCode implements the `StatePlugin` interface by returning
 // the code of account (nil if not exists).
 func (p *plugin) GetCode(addr common.Address) []byte {
-	codeHash := p.GetCodeHash(addr)
-	if (codeHash == common.Hash{}) || codeHash == emptyCodeHash {
-		// if account at addr does not exist or the account  does not have a codehash, return nil
-		return nil
-	}
-	return p.cms.GetKVStore(p.storeKey).Get(CodeKeyFor(codeHash))
+	return rawdb.ReadCode(cosmosrawdb.NewAdapter(p.cms.GetKVStore(p.storeKey)), p.GetCodeHash(addr))
 }
 
 // SetCode implements the `StatePlugin` interface by setting the code hash and
@@ -365,9 +362,9 @@ func (p *plugin) SetCode(addr common.Address, code []byte) {
 
 	// store or delete code
 	if len(code) == 0 {
-		ethStore.Delete(CodeKeyFor(codeHash))
+		rawdb.DeleteCode(cosmosrawdb.NewAdapter(ethStore), codeHash)
 	} else {
-		ethStore.Set(CodeKeyFor(codeHash), code)
+		rawdb.WriteCode(cosmosrawdb.NewAdapter(ethStore), codeHash, code)
 	}
 }
 
