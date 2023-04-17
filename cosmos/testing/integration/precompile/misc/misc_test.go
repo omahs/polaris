@@ -18,42 +18,34 @@
 // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, NON-INFRINGEMENT, AND
 // TITLE.
 
-package network_test
+package misc
 
 import (
 	"os"
 	"testing"
-	"time"
 
-	"pkg.berachain.dev/polaris/cosmos/testing/network"
+	"pkg.berachain.dev/polaris/cosmos/testing/integration"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
 
-func TestNetwork(t *testing.T) {
+func TestMiscellaneousPrecompile(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "cosmos/testing/network:integration")
+	RunSpecs(t, "cosmos/testing/integration/precompile/misc")
 }
 
-const defaultTimeout = 15 * time.Second
+var tf *integration.TestFixture
 
-var _ = Describe("Network", func() {
-	var net *network.Network
-	BeforeEach(func() {
-		net = network.New(GinkgoT())
-		time.Sleep(5 * time.Second)
-		_, err := net.WaitForHeightWithTimeout(3, defaultTimeout)
-		Expect(err).ToNot(HaveOccurred())
-	})
+var _ = SynchronizedBeforeSuite(func() []byte {
+	// Setup the network and clients here.
+	tf = integration.NewTestFixture(GinkgoT())
+	return nil
+}, func(data []byte) {})
 
-	AfterEach(func() {
-		// TODO: FIX THE OFFCHAIN DB
-		os.RemoveAll("data")
-	})
-
-	It("should produce blocks", func() {
-		_, err := net.WaitForHeightWithTimeout(5, defaultTimeout)
-		Expect(err).ToNot(HaveOccurred())
-	})
+var _ = SynchronizedAfterSuite(func() {
+	// Local AfterSuite actions.
+}, func() {
+	// Global AfterSuite actions.
+	os.RemoveAll("data")
 })

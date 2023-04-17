@@ -18,42 +18,36 @@
 // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, NON-INFRINGEMENT, AND
 // TITLE.
 
-package network_test
+package misc
 
 import (
-	"os"
-	"testing"
-	"time"
-
-	"pkg.berachain.dev/polaris/cosmos/testing/network"
+	tbindings "pkg.berachain.dev/polaris/contracts/bindings/testing"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	. "pkg.berachain.dev/polaris/cosmos/testing/integration/utils"
 )
 
-func TestNetwork(t *testing.T) {
-	RegisterFailHandler(Fail)
-	RunSpecs(t, "cosmos/testing/network:integration")
-}
+var _ = Describe("Miscellaneous Precompile Tests", func() {
+	Describe("calling a precompile from the constructor", func() {
+		It("should successfully deploy", func() {
+			addr, tx, contract, err := tbindings.DeployPrecompileConstructor(
+				tf.GenerateTransactOpts(""), tf.EthClient,
+			)
+			Expect(err).NotTo(HaveOccurred())
+			ExpectSuccessReceipt(tf.EthClient, tx)
+			Expect(contract).ToNot(BeNil())
+			Expect(addr).ToNot(BeEmpty())
 
-const defaultTimeout = 15 * time.Second
+			err = tf.Network.WaitForNextBlock()
+			Expect(err).NotTo(HaveOccurred())
 
-var _ = Describe("Network", func() {
-	var net *network.Network
-	BeforeEach(func() {
-		net = network.New(GinkgoT())
-		time.Sleep(5 * time.Second)
-		_, err := net.WaitForHeightWithTimeout(3, defaultTimeout)
-		Expect(err).ToNot(HaveOccurred())
-	})
-
-	AfterEach(func() {
-		// TODO: FIX THE OFFCHAIN DB
-		os.RemoveAll("data")
-	})
-
-	It("should produce blocks", func() {
-		_, err := net.WaitForHeightWithTimeout(5, defaultTimeout)
-		Expect(err).ToNot(HaveOccurred())
+			aberaAddr, err := contract.Abera(nil)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(aberaAddr).ToNot(BeEmpty())
+			aberaStr, err := contract.Denom(nil)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(aberaStr).To(Equal("abera"))
+		})
 	})
 })
