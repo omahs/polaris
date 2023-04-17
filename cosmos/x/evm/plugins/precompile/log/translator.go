@@ -123,3 +123,7 @@ func (f *Factory) getValueDecoder(attrKey string) (precompile.ValueDecoder, erro
 	// no value decoder function was found for attribute key
 	return nil, errors.Wrap(ErrNoValueDecoderFunc, attrKey)
 }
+
+func getEventID(event *sdk.Event) common.Hash {
+	
+}
