@@ -41,7 +41,9 @@ func TestConfig(t *testing.T) {
 var _ = Describe("Configuration", func() {
 	It("should set Bech32 prefixes", func() {
 		config := sdk.GetConfig()
+		prefix := "bananaprefix"
 
+		// Should be the standard prefixes
 		Expect(config.GetBech32AccountAddrPrefix()).To(Equal(sdk.Bech32PrefixAccAddr))
 		Expect(config.GetBech32AccountPubPrefix()).To(Equal(sdk.Bech32PrefixAccPub))
 		Expect(config.GetBech32ValidatorAddrPrefix()).To(Equal(sdk.Bech32PrefixValAddr))
@@ -49,14 +51,27 @@ var _ = Describe("Configuration", func() {
 		Expect(config.GetBech32ConsensusAddrPrefix()).To(Equal(sdk.Bech32PrefixConsAddr))
 		Expect(config.GetBech32ConsensusPubPrefix()).To(Equal(sdk.Bech32PrefixConsPub))
 
-		sgconfig.SetBech32Prefixes(config)
+		sgconfig.SetBech32Prefixes("bananaprefix", config)
 
-		Expect(config.GetBech32AccountAddrPrefix()).To(Equal(sgconfig.Bech32PrefixAccAddr))
-		Expect(config.GetBech32AccountPubPrefix()).To(Equal(sgconfig.Bech32PrefixAccPub))
-		Expect(config.GetBech32ValidatorAddrPrefix()).To(Equal(sgconfig.Bech32PrefixValAddr))
-		Expect(config.GetBech32ValidatorPubPrefix()).To(Equal(sgconfig.Bech32PrefixValPub))
-		Expect(config.GetBech32ConsensusAddrPrefix()).To(Equal(sgconfig.Bech32PrefixConsAddr))
-		Expect(config.GetBech32ConsensusPubPrefix()).To(Equal(sgconfig.Bech32PrefixConsPub))
+		// // Bech32PrefixAccAddr defines the Bech32 prefix of an account's address
+		// Bech32PrefixAccAddr = Bech32MainPrefix
+		// // Bech32PrefixAccPub defines the Bech32 prefix of an account's public key
+		// Bech32PrefixAccPub = Bech32MainPrefix + PrefixPublic
+		// // Bech32PrefixValAddr defines the Bech32 prefix of a validator's operator address
+		// Bech32PrefixValAddr = Bech32MainPrefix + PrefixValidator + PrefixOperator
+		// // Bech32PrefixValPub defines the Bech32 prefix of a validator's operator public key
+		// Bech32PrefixValPub = Bech32MainPrefix + PrefixValidator + PrefixOperator + PrefixPublic
+		// // Bech32PrefixConsAddr defines the Bech32 prefix of a consensus node address
+		// Bech32PrefixConsAddr = Bech32MainPrefix + PrefixValidator + PrefixConsensus
+		// // Bech32PrefixConsPub defines the Bech32 prefix of a consensus node public key
+		// Bech32PrefixConsPub = Bech32MainPrefix + PrefixValidator + PrefixConsensus + PrefixPublic
+
+		Expect(config.GetBech32AccountAddrPrefix()).To(Equal("bananaprefix"))
+		Expect(config.GetBech32AccountPubPrefix()).To(Equal(prefix + sdk.PrefixPublic))
+		Expect(config.GetBech32ValidatorAddrPrefix()).To(Equal(prefix + sdk.PrefixValidator + sdk.PrefixOperator))
+		Expect(config.GetBech32ValidatorPubPrefix()).To(Equal(prefix + sdk.PrefixValidator + sdk.PrefixOperator + sdk.PrefixPublic))
+		Expect(config.GetBech32ConsensusAddrPrefix()).To(Equal(prefix + sdk.PrefixValidator + sdk.PrefixConsensus))
+		Expect(config.GetBech32ConsensusPubPrefix()).To(Equal(prefix + sdk.PrefixValidator + sdk.PrefixConsensus + sdk.PrefixPublic))
 
 		Expect(config.GetBech32AccountAddrPrefix()).To(Equal(sdk.GetConfig().GetBech32AccountAddrPrefix()))
 		Expect(config.GetBech32AccountPubPrefix()).To(Equal(sdk.GetConfig().GetBech32AccountPubPrefix()))
@@ -90,7 +105,7 @@ var _ = Describe("Configuration", func() {
 
 var _ = Describe("RegisterDenoms", func() {
 	It("should register the base and display denominations", func() {
-		sgconfig.RegisterDenoms()
+		sgconfig.RegisterDenoms("bera", "abera")
 
 		// Check if the base denomination was registered correctly
 		baseDenom, err := sdk.GetBaseDenom()

@@ -142,7 +142,7 @@ var (
 	)
 	// application configuration (used by depinject).
 	AppConfig = appconfig.Compose(&appv1alpha1.Config{
-		Modules: simappconfig.DefaultModule,
+		Modules: simappconfig.DefaultModules("cosmos"),
 	})
 )
 
@@ -195,8 +195,6 @@ func init() {
 	}
 
 	DefaultNodeHome = filepath.Join(userHomeDir, ".polard")
-
-	simappconfig.SetupCosmosConfig()
 }
 
 // NewPolarisApp returns a reference to an initialized PolarisApp.

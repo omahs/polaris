@@ -94,8 +94,11 @@ var (
 		// We allow the following module accounts to receive funds:
 		// govtypes.ModuleName
 	}
+)
 
-	DefaultModule = []*appv1alpha1.ModuleConfig{
+// DefaultModules returns a configuration for the default modules, with a given bech32Prefix.
+func DefaultModules(bech32Prefix string) []*appv1alpha1.ModuleConfig {
+	return []*appv1alpha1.ModuleConfig{
 		{
 			Name:   runtime.ModuleName,
 			Config: appconfig.WrapAny(DefaultRuntime),
@@ -103,7 +106,7 @@ var (
 		{
 			Name: authtypes.ModuleName,
 			Config: appconfig.WrapAny(&authmodulev1.Module{
-				Bech32Prefix:             Bech32Prefix,
+				Bech32Prefix:             bech32Prefix,
 				ModuleAccountPermissions: ModuleAccPerms,
 				// By default modules authority is the governance module. This is configurable with the following:
 				// Authority: "group", // A custom module authority can be set using a module name
@@ -194,4 +197,4 @@ var (
 			Config: appconfig.WrapAny(&erc20modulev1alpha1.Module{}),
 		},
 	}
-)
+}

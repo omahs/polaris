@@ -31,7 +31,6 @@ import (
 
 	"pkg.berachain.dev/polaris/cosmos/cmd/polard/cmd"
 	simapp "pkg.berachain.dev/polaris/cosmos/runtime"
-	"pkg.berachain.dev/polaris/cosmos/runtime/config"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -41,10 +40,6 @@ func TestCmd(t *testing.T) {
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "cosmos/cmd/polard/cmd:integration")
 }
-
-var _ = BeforeSuite(func() {
-	config.SetupCosmosConfig()
-})
 
 var _ = Describe("Init command", func() {
 	It("should initialize the app with given options", func() {

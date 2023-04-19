@@ -29,41 +29,49 @@ import (
 )
 
 const (
-	// Bech32Prefix defines the Bech32 prefix used for EthAccounts.
-	Bech32Prefix = "polar"
-	// Bech32PrefixAccAddr defines the Bech32 prefix of an account's address.
-	Bech32PrefixAccAddr = Bech32Prefix
-	// Bech32PrefixAccPub defines the Bech32 prefix of an account's public key.
-	Bech32PrefixAccPub = Bech32Prefix + sdk.PrefixPublic
-	// Bech32PrefixValAddr defines the Bech32 prefix of a validator's operator address.
-	Bech32PrefixValAddr = Bech32Prefix + sdk.PrefixValidator + sdk.PrefixOperator
-	// Bech32PrefixValPub defines the Bech32 prefix of a validator's operator public key.
-	Bech32PrefixValPub = Bech32Prefix + sdk.PrefixValidator + sdk.PrefixOperator + sdk.PrefixPublic
-	// Bech32PrefixConsAddr defines the Bech32 prefix of a consensus node address.
-	Bech32PrefixConsAddr = Bech32Prefix + sdk.PrefixValidator + sdk.PrefixConsensus
-	// Bech32PrefixConsPub defines the Bech32 prefix of a consensus node public key.
-	Bech32PrefixConsPub = Bech32Prefix + sdk.PrefixValidator + sdk.PrefixConsensus + sdk.PrefixPublic
+	// PolarBech32Prefix defines the Bech32 prefix of the local polaris chain.
+	PolarBech32Prefix = "polar"
 )
 
+// We want to ensure that the config is only being setup conce.
 var initConfig sync.Once
 
 // SetupCosmosConfig sets up the Cosmos SDK configuration to be compatible with the semantics of etheruem.
 func SetupCosmosConfig() {
+	SetupCosmosConfigWith(PolarBech32Prefix, "bera", "abera")
+}
+
+// SetupCosmosConfigWith sets up the Cosmos SDK configuration to be compatible with the semantics of etheruem.
+func SetupCosmosConfigWith(bech32Prefix, baseDenom, attoDenom string) {
 	initConfig.Do(func() {
 		// set the address prefixes
 		config := sdk.GetConfig()
-		SetBech32Prefixes(config)
+		SetBech32Prefixes(bech32Prefix, config)
 		SetBip44CoinType(config)
-		RegisterDenoms()
+		RegisterDenoms(baseDenom, attoDenom)
 		config.Seal()
 	})
 }
 
 // SetBech32Prefixes sets the global prefixes to be used when serializing addresses and public keys to Bech32 strings.
-func SetBech32Prefixes(config *sdk.Config) {
-	config.SetBech32PrefixForAccount(Bech32PrefixAccAddr, Bech32PrefixAccPub)
-	config.SetBech32PrefixForValidator(Bech32PrefixValAddr, Bech32PrefixValPub)
-	config.SetBech32PrefixForConsensusNode(Bech32PrefixConsAddr, Bech32PrefixConsPub)
+func SetBech32Prefixes(prefix string, config *sdk.Config) {
+	// Bech32PrefixAccAddr defines the Bech32 prefix of an account's address.
+	var (
+		bech32PrefixAccAddr = prefix
+		// Bech32PrefixAccPub defines the Bech32 prefix of an account's public key.
+		bech32PrefixAccPub = prefix + sdk.PrefixPublic
+		// Bech32PrefixValAddr defines the Bech32 prefix of a validator's operator address.
+		bech32PrefixValAddr = prefix + sdk.PrefixValidator + sdk.PrefixOperator
+		// Bech32PrefixValPub defines the Bech32 prefix of a validator's operator public key.
+		bech32PrefixValPub = prefix + sdk.PrefixValidator + sdk.PrefixOperator + sdk.PrefixPublic
+		// Bech32PrefixConsAddr defines the Bech32 prefix of a consensus node address.
+		bech32PrefixConsAddr = prefix + sdk.PrefixValidator + sdk.PrefixConsensus
+		// Bech32PrefixConsPub defines the Bech32 prefix of a consensus node public key.
+		bech32PrefixConsPub = prefix + sdk.PrefixValidator + sdk.PrefixConsensus + sdk.PrefixPublic
+	)
+	config.SetBech32PrefixForAccount(bech32PrefixAccAddr, bech32PrefixAccPub)
+	config.SetBech32PrefixForValidator(bech32PrefixValAddr, bech32PrefixValPub)
+	config.SetBech32PrefixForConsensusNode(bech32PrefixConsAddr, bech32PrefixConsPub)
 }
 
 // SetBip44CoinType sets the global coin type to be used in hierarchical deterministic wallets.
@@ -73,12 +81,12 @@ func SetBip44CoinType(config *sdk.Config) {
 }
 
 // RegisterDenoms registers the base and display denominations to the SDK.
-func RegisterDenoms() {
-	if err := sdk.RegisterDenom("bera", sdk.OneDec()); err != nil {
+func RegisterDenoms(baseDenom, attoDenom string) {
+	if err := sdk.RegisterDenom(baseDenom, sdk.OneDec()); err != nil {
 		panic(err)
 	}
 
-	if err := sdk.RegisterDenom("abera", sdk.NewDecWithPrec(1, accounts.EtherDecimals)); err != nil {
+	if err := sdk.RegisterDenom(attoDenom, sdk.NewDecWithPrec(1, accounts.EtherDecimals)); err != nil {
 		panic(err)
 	}
 }

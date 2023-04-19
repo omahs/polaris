@@ -42,7 +42,6 @@ import (
 	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 
-	"pkg.berachain.dev/polaris/cosmos/runtime/config"
 	"pkg.berachain.dev/polaris/cosmos/testing/types/mock"
 	erc20types "pkg.berachain.dev/polaris/cosmos/x/erc20/types"
 	evmtypes "pkg.berachain.dev/polaris/cosmos/x/evm/types"
@@ -74,7 +73,6 @@ func SetupMinimalKeepers() (
 	bankkeeper.BaseKeeper,
 	stakingkeeper.Keeper,
 ) {
-	config.SetupCosmosConfig()
 	ctx := NewContext()
 
 	encodingConfig := testutil.MakeTestEncodingConfig(
@@ -96,7 +94,7 @@ func SetupMinimalKeepers() (
 			govtypes.ModuleName:            {authtypes.Minter, authtypes.Burner},
 			distrtypes.ModuleName:          {authtypes.Minter, authtypes.Burner},
 		},
-		config.Bech32Prefix,
+		sdk.Bech32MainPrefix, // To avoid the stupid config issue, for tests we use the main prefix ("cosmos").
 		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
 	)
 
