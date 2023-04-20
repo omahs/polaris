@@ -95,7 +95,7 @@ If you want to help contribute to the framework, check out the [Framework Specs]
    cd $HOME
    git clone https://github.com/berachain/polaris
    cd polaris
-   git checkout main
+   git checkout rollkit
    go run magefiles/setup/setup.go
    mage cosmos:test
    ```
