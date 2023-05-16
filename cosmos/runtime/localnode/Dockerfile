@@ -52,7 +52,6 @@ RUN set -eux; apk add --no-cache ca-certificates build-base;
 RUN apk add git
 
 
-
 # Needed by github.com/zondax/hid
 RUN apk add linux-headers
 
@@ -64,6 +63,8 @@ COPY --from=foundry /polaris/${PRECOMPILE_CONTRACTS_DIR}/out /polaris/${PRECOMPI
 # COPY go.mod ./
 # COPY go.sum ./
 
+# Go mod download
+RUN go mod download
 
 # Build berad binary
 RUN --mount=type=cache,target=/root/.cache/go-build \
