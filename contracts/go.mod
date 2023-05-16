@@ -23,6 +23,7 @@ require (
 	github.com/klauspost/compress v1.16.5 // indirect
 	github.com/mattn/go-runewidth v0.0.14 // indirect
 	github.com/prometheus/client_golang v1.15.0 // indirect
+	github.com/rivo/uniseg v0.4.3 // indirect
 	github.com/rogpeppe/go-internal v1.10.0 // indirect
 	github.com/shirou/gopsutil v3.21.11+incompatible // indirect
 	github.com/stretchr/testify v1.8.2 // indirect

@@ -32,7 +32,7 @@ ARG PRECOMPILE_CONTRACTS_DIR
 COPY ${PRECOMPILE_CONTRACTS_DIR} ${PRECOMPILE_CONTRACTS_DIR}
 WORKDIR /polaris/${PRECOMPILE_CONTRACTS_DIR}
 
-RUN forge build
+RUN forge build --extra-output-files bin --extra-output-files abi
 
 
 # #############################dock##########################

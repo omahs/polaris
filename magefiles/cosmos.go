@@ -50,7 +50,7 @@ var (
 	// testImageVersion       = "e2e-test-dev".
 	goVersion              = "1.20.4"
 	golangAlpine           = "golang:1.20-alpine3.17"
-	precompileContractsDir = "./cosmos/precompile/contracts/solidity"
+	precompileContractsDir = "./contracts"
 )
 
 // Compile-time assertion that we implement the interface correctly.

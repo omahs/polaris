@@ -36,6 +36,7 @@ require (
 	github.com/alecthomas/units v0.0.0-20211218093645-b94a6e3cc137 // indirect
 	github.com/alexkohler/prealloc v1.0.0 // indirect
 	github.com/alingse/asasalint v0.0.11 // indirect
+	github.com/allegro/bigcache v1.2.1 // indirect
 	github.com/ashanbrown/forbidigo v1.4.0 // indirect
 	github.com/ashanbrown/makezero v1.1.1 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
@@ -202,7 +203,7 @@ require (
 	github.com/quasilyte/gogrep v0.5.0 // indirect
 	github.com/quasilyte/regex/syntax v0.0.0-20200407221936-30656e2c4a95 // indirect
 	github.com/quasilyte/stdinfo v0.0.0-20220114132959-f7386bf02567 // indirect
-	github.com/rivo/uniseg v0.2.0 // indirect
+	github.com/rivo/uniseg v0.4.3 // indirect
 	github.com/rogpeppe/go-internal v1.10.0 // indirect
 	github.com/rs/cors v1.8.3 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
@@ -257,6 +258,7 @@ require (
 	go.opentelemetry.io/otel/sdk v1.14.0 // indirect
 	go.opentelemetry.io/otel/trace v1.14.0 // indirect
 	go.uber.org/atomic v1.10.0 // indirect
+	go.uber.org/goleak v1.1.12 // indirect
 	go.uber.org/multierr v1.10.0 // indirect
 	go.uber.org/zap v1.24.0 // indirect
 	golang.org/x/crypto v0.8.0 // indirect

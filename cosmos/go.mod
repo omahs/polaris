@@ -70,6 +70,7 @@ require (
 	github.com/ChainSafe/go-schnorrkel v0.0.0-20200405005733-88cbf1b4c40d // indirect
 	github.com/DataDog/zstd v1.5.2 // indirect
 	github.com/VictoriaMetrics/fastcache v1.12.1 // indirect
+	github.com/allegro/bigcache v1.2.1 // indirect
 	github.com/armon/go-metrics v0.4.1 // indirect
 	github.com/aws/aws-sdk-go v1.44.224 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
@@ -190,6 +191,7 @@ require (
 	github.com/oklog/run v1.1.0 // indirect
 	github.com/olekukonko/tablewriter v0.0.5 // indirect
 	github.com/onsi/ginkgo v1.16.5 // indirect
+	github.com/opencontainers/runc v1.1.5 // indirect
 	github.com/pelletier/go-toml/v2 v2.0.7 // indirect
 	github.com/petermattis/goid v0.0.0-20230317030725-371a4b8eda08 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
@@ -199,7 +201,7 @@ require (
 	github.com/prometheus/common v0.42.0 // indirect
 	github.com/prometheus/procfs v0.9.0 // indirect
 	github.com/rcrowley/go-metrics v0.0.0-20201227073835-cf1acfcdf475 // indirect
-	github.com/rivo/uniseg v0.2.0 // indirect
+	github.com/rivo/uniseg v0.4.3 // indirect
 	github.com/rogpeppe/go-internal v1.10.0 // indirect
 	github.com/rs/cors v1.8.3 // indirect
 	github.com/rs/zerolog v1.29.1 // indirect
