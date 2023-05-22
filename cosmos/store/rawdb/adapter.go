@@ -26,7 +26,7 @@ func (a *adapter) Put(key []byte, value []byte) error {
 	return nil
 }
 
-func (a *adapter) Get(key []byte) ([]byte, error) {
+func (a *adapteer) Get(key []byte) ([]byte, error) {
 	value := a.KVStore.Get(key)
 	if value == nil {
 		return nil, errors.New("no such key")
