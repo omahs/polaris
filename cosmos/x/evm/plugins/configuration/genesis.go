@@ -28,14 +28,14 @@ import (
 
 // InitGenesis performs genesis initialization for the evm module. It returns
 // no validator updates.
-func (p *plugin) InitGenesis(ctx sdk.Context, genesisState *types.GenesisState) {
+func (p *plugin) InitGenesis(ctx sdk.Context, genesisParams *types.Params) {
 	p.Prepare(ctx)
-	p.SetParams(&genesisState.Params)
+	p.SetParams(genesisParams)
 }
 
 // ExportGenesis returns the exported genesis state as raw bytes for the evm
 // module.
-func (p *plugin) ExportGenesis(ctx sdk.Context, genesisState *types.GenesisState) {
+func (p *plugin) ExportGenesis(ctx sdk.Context, genesisParams *types.Params) {
 	p.Prepare(ctx)
-	genesisState.Params = *p.GetParams()
+	genesisParams = p.GetParams()
 }

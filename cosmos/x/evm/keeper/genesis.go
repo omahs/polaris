@@ -29,7 +29,7 @@ import (
 )
 
 // InitGenesis is called during the InitGenesis.
-func (k *Keeper) InitGenesis(ctx sdk.Context, genState types.GenesisState) error {
+func (k *Keeper) InitGenesis(ctx sdk.Context, genState types.Params) error {
 	// Initialize all the plugins.
 	for _, plugin := range k.host.GetAllPlugins() {
 		// checks whether plugin implements methods of HasGenesis and executes them if it does
@@ -43,12 +43,12 @@ func (k *Keeper) InitGenesis(ctx sdk.Context, genState types.GenesisState) error
 }
 
 // ExportGenesis returns the exported genesis state.
-func (k *Keeper) ExportGenesis(ctx sdk.Context) *types.GenesisState {
-	genesisState := new(types.GenesisState)
+func (k *Keeper) ExportGenesis(ctx sdk.Context) *types.Params {
+	genesisParams := new(types.Params)
 	for _, plugin := range k.host.GetAllPlugins() {
 		if plugin, ok := utils.GetAs[plugins.HasGenesis](plugin); ok {
-			plugin.ExportGenesis(ctx, genesisState)
+			plugin.ExportGenesis(ctx, genesisParams)
 		}
 	}
-	return genesisState
+	return genesisParams
 }

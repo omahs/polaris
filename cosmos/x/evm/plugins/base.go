@@ -36,6 +36,6 @@ type Base interface {
 // InitGenesis or ExportGenesis methods must implement
 
 type HasGenesis interface {
-	InitGenesis(sdk.Context, *types.GenesisState)
-	ExportGenesis(sdk.Context, *types.GenesisState)
+	InitGenesis(sdk.Context, *types.Params)
+	ExportGenesis(sdk.Context, *types.Params)
 }

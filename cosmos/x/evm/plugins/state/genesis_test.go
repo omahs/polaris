@@ -96,7 +96,7 @@ var _ = Describe("Genesis", func() {
 		sp.Finalize()
 
 		// Export Genesis.
-		exportedGenesis := types.GenesisState{}
+		exportedGenesis := types.Params{}
 		sp.ExportGenesis(ctx, &exportedGenesis)
 
 		// Check that the code is exported.

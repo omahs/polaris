@@ -18,31 +18,21 @@
 // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, NON-INFRINGEMENT, AND
 // TITLE.
 
-syntax = "proto3";
-package polaris.evm.v1alpha1;
+package core
 
-import "gogoproto/gogo.proto";
-import "polaris/evm/v1alpha1/params.proto";
+import (
+	"math/big"
 
-option go_package = "pkg.berachain.dev/polaris/cosmos/x/evm/types";
+	"github.com/ethereum/go-ethereum/core"
+	"pkg.berachain.dev/polaris/eth/common/hexutil"
+	"pkg.berachain.dev/polaris/eth/params"
+)
 
-// GenesisState defines the evm module's genesis state.
-message GenesisState {
-  // params defines all the parameters of the module.
-  Params params = 1 [(gogoproto.nullable) = false];
-
-  // `address_to_contract` is a map of address to contract.
-  map<string, Contract> address_to_contract = 2;
-
-  // `hash_to_code` is a map of code hash to code.
-  map<string, string> hash_to_code = 3;
-}
-
-// `Contract` defines the contract state.
-message Contract {
-  // `code_hash` is the hash of the contract code.
-  string code_hash = 1;
-
-  // `slot_to_value` is a map of slot to value.
-  map<string, string> slot_to_value = 2;
+var DefaultGenesis = &core.Genesis{
+	Config:     params.DefaultChainConfig,
+	Nonce:      69, //nolint:gomnd // its okay.
+	ExtraData:  hexutil.MustDecode("0x11bbe8db4e347b4e8c937c1c8370e4b5ed33adb3db69cbdb7a38e1e50b1b82fa"),
+	GasLimit:   30_000_000,     //nolint:gomnd // its okay.
+	Difficulty: big.NewInt(69), //nolint:gomnd // its okay.
+	Alloc:      core.GenesisAlloc{},
 }

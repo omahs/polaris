@@ -28,10 +28,10 @@ import (
 )
 
 // InitGenesis takes in a pointer to a genesis state object and populates the KV store.
-func (p *plugin) InitGenesis(ctx sdk.Context, data *types.GenesisState) {
+func (p *plugin) InitGenesis(ctx sdk.Context, data *types.Params) {
 	p.Reset(ctx)
 
-	for addr, contract := range data.AddressToContract {
+	for addr, contract := range data.eth_genesis.GenesisAlloc {
 		// Set the contract code.
 		address := common.HexToAddress(addr)
 		code := []byte(data.HashToCode[contract.CodeHash])
@@ -43,13 +43,16 @@ func (p *plugin) InitGenesis(ctx sdk.Context, data *types.GenesisState) {
 			value := common.HexToHash(v)
 			p.SetState(address, slot, value)
 		}
+
+		// Set Balance
+		p.SetBalance(addr, amt)
 	}
 
 	p.Finalize()
 }
 
 // Export genesis modifies a pointer to a genesis state object and populates it.
-func (p *plugin) ExportGenesis(ctx sdk.Context, data *types.GenesisState) {
+func (p *plugin) ExportGenesis(ctx sdk.Context, data *types.Params) {
 	p.Reset(ctx)
 
 	// Allocate memory for the address to contract map if it is nil.

@@ -36,24 +36,24 @@ import (
 // DefaultGenesis returns default genesis state as raw bytes for the evm
 // module.
 func (AppModuleBasic) DefaultGenesis(cdc codec.JSONCodec) json.RawMessage {
-	return cdc.MustMarshalJSON(types.DefaultGenesis())
+	return cdc.MustMarshalJSON(types.DefaultParams())
 }
 
 // ValidateGenesis performs genesis state validation for the evm module.
 func (AppModuleBasic) ValidateGenesis(cdc codec.JSONCodec, _ client.TxEncodingConfig, bz json.RawMessage) error {
-	var data types.GenesisState
+	var data types.Params
 	if err := cdc.UnmarshalJSON(bz, &data); err != nil {
 		return fmt.Errorf("failed to unmarshal %s genesis state: %w", types.ModuleName, err)
 	}
-	return types.ValidateGenesis(data)
+	return data.ValidateBasic()
 }
 
 // InitGenesis performs genesis initialization for the evm module. It returns
 // no validator updates.
 func (am AppModule) InitGenesis(ctx sdk.Context, cdc codec.JSONCodec, data json.RawMessage) []abci.ValidatorUpdate {
-	var genesisState types.GenesisState
-	cdc.MustUnmarshalJSON(data, &genesisState)
-	if err := am.keeper.InitGenesis(ctx, genesisState); err != nil {
+	var genesisParams types.Params
+	cdc.MustUnmarshalJSON(data, &genesisParams)
+	if err := am.keeper.InitGenesis(ctx, genesisParams); err != nil {
 		panic(err)
 	}
 	return []abci.ValidatorUpdate{}
