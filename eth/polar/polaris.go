@@ -106,6 +106,10 @@ func NewWithNetworkingStack(
 	return pl
 }
 
+func (pl *Polaris) Backend() Backend {
+	return pl.backend
+}
+
 // APIs return the collection of RPC services the polar package offers.
 // NOTE, some of these services probably need to be moved to somewhere else.
 func (pl *Polaris) APIs() []rpc.API {
@@ -122,7 +126,13 @@ func (pl *Polaris) APIs() []rpc.API {
 			Namespace: "web3",
 			Service:   polarapi.NewWeb3API(pl.backend),
 		},
+		{},
 	}...)
+}
+
+// RegisterCustomAPI allows the implementing chain to register their own custom APIs.
+func (pl *Polaris) RegisterCustomAPI(apis []rpc.API) {
+	pl.stack.RegisterAPIs(apis)
 }
 
 // StartServices notifies the NetworkStack to spin up (i.e json-rpc).

@@ -21,6 +21,8 @@
 package keeper
 
 import (
+	"debug/macho"
+
 	"cosmossdk.io/log"
 	storetypes "cosmossdk.io/store/types"
 
@@ -35,6 +37,8 @@ import (
 	ethprecompile "pkg.berachain.dev/polaris/eth/core/precompile"
 	ethlog "pkg.berachain.dev/polaris/eth/log"
 	"pkg.berachain.dev/polaris/eth/polar"
+	"pkg.berachain.dev/polaris/eth/rpc"
+	cosmosrpc "pkg.berachain/dev/polaris/cosmos/rpc"
 )
 
 type Keeper struct {
@@ -116,6 +120,15 @@ func (k *Keeper) Setup(
 			return nil
 		}),
 	)
+
+	k.polaris.RegisterCustomAPI(rpc.API{
+		Namespace: "cosmos",
+		Service: cosmosrpc.StakingAPIHandler{
+			pl.Backend(),
+			qc,
+			stakingkeeper.NewQuerier(k.sk),
+		}
+	})
 }
 
 // Logger returns a module-specific logger.
