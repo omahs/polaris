@@ -21,12 +21,13 @@
 package txpool
 
 import (
+	"fmt"
+
+	evmtypes "pkg.berachain.dev/polaris/cosmos/x/evm/types"
+
 	"github.com/cosmos/cosmos-sdk/client"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	signingtypes "github.com/cosmos/cosmos-sdk/types/tx/signing"
 
-	"pkg.berachain.dev/polaris/cosmos/crypto/keys/ethsecp256k1"
-	evmante "pkg.berachain.dev/polaris/cosmos/x/evm/ante"
 	"pkg.berachain.dev/polaris/cosmos/x/evm/types"
 	coretypes "pkg.berachain.dev/polaris/eth/core/types"
 )
@@ -35,60 +36,61 @@ import (
 func SerializeToSdkTx(
 	clientCtx client.Context, signedTx *coretypes.Transaction,
 ) (sdk.Tx, error) {
-	// TODO: do we really need to use extensions for anything? Since we
-	// are using the standard ante handler stuff I don't think we actually need to.
-	tx := clientCtx.TxConfig.NewTxBuilder()
+	// // TODO: do we really need to use extensions for anything? Since we
+	// // are using the standard ante handler stuff I don't think we actually need to.
+	// tx := clientCtx.TxConfig.NewTxBuilder()
 
-	// We can also retrieve the gaslimit for the transaction from the ethereum transaction.
-	tx.SetGasLimit(signedTx.Gas())
+	// // We can also retrieve the gaslimit for the transaction from the ethereum transaction.
+	// tx.SetGasLimit(signedTx.Gas())
 
-	// Thirdly, we set the nonce equal to the nonce of the transaction and also derive the PubKey
-	// from the V,R,S values of the transaction. This allows us for a little trick to allow
-	// ethereum transactions to work in the standard cosmos app-side mempool with no modifications.
-	// Some gigabrain shit tbh.
-	pkBz, err := coretypes.PubkeyFromTx(
-		signedTx, coretypes.LatestSignerForChainID(signedTx.ChainId()),
-	)
-	if err != nil {
-		return nil, err
-	}
+	// // Thirdly, we set the nonce equal to the nonce of the transaction and also derive the PubKey
+	// // from the V,R,S values of the transaction. This allows us for a little trick to allow
+	// // ethereum transactions to work in the standard cosmos app-side mempool with no modifications.
+	// // Some gigabrain shit tbh.
+	// pkBz, err := coretypes.PubkeyFromTx(
+	// 	signedTx, coretypes.LatestSignerForChainID(signedTx.ChainId()),
+	// )
+	// if err != nil {
+	// 	return nil, err
+	// }
 
-	pk := ethsecp256k1.PubKey{Key: pkBz}
+	// pk := ethsecp256k1.PubKey{Key: pkBz}
 
 	// Create the WrappedEthereumTransaction message.
 	wrappedEthTx := types.NewFromTransaction(signedTx)
+	return wrappedEthTx, nil
 
-	sig, err := wrappedEthTx.GetSignature()
-	if err != nil {
-		return nil, err
-	}
+	// sig, err := wrappedEthTx.GetSignature()
+	// if err != nil {
+	// 	return nil, err
+	// }
 
-	// Lastly, we set the signature. We can pull the sequence from the nonce of the ethereum tx.
-	if err = tx.SetSignatures(
-		signingtypes.SignatureV2{
-			Sequence: signedTx.Nonce(),
-			Data: &signingtypes.SingleSignatureData{
-				// TODO: this is ghetto af.
-				SignMode: signingtypes.SignMode(int32(evmante.SignMode_SIGN_MODE_ETHEREUM)),
-				// We retrieve the hash of the signed transaction from the ethereum transaction
-				// objects, as this was the bytes that were signed. We pass these into the
-				// SingleSignatureData as the SignModeHandler needs to know what data was signed
-				// over so that it can verify the signature in the ante handler.
-				Signature: sig,
-			},
-			PubKey: &pk,
-		},
-	); err != nil {
-		return nil, err
-	}
+	// // Lastly, we set the signature. We can pull the sequence from the nonce of the ethereum tx.
+	// if err = tx.SetSignatures(
+	// 	signingtypes.SignatureV2{
+	// 		Sequence: signedTx.Nonce(),
+	// 		Data: &signingtypes.SingleSignatureData{
+	// 			// TODO: this is ghetto af.
+	// 			SignMode: signingtypes.SignMode(int32(evmante.SignMode_SIGN_MODE_ETHEREUM)),
+	// 			// We retrieve the hash of the signed transaction from the ethereum transaction
+	// 			// objects, as this was the bytes that were signed. We pass these into the
+	// 			// SingleSignatureData as the SignModeHandler needs to know what data was signed
+	// 			// over so that it can verify the signature in the ante handler.
+	// 			Signature: sig,
+	// 		},
+	// 		PubKey: &pk,
+	// 	},
+	// ); err != nil {
+	// 	return nil, err
+	// }
 
-	// Lastly, we inject the signed ethereum transaction as a message into the Cosmos Tx.
-	if err = tx.SetMsgs(wrappedEthTx); err != nil {
-		return nil, err
-	}
+	// // Lastly, we inject the signed ethereum transaction as a message into the Cosmos Tx.
+	// if err = tx.SetMsgs(wrappedEthTx); err != nil {
+	// 	return nil, err
+	// }
 
-	// Finally, we return the Cosmos Tx.
-	return tx.GetTx(), nil
+	// // Finally, we return the Cosmos Tx.
+	// return tx.GetTx(), nil
 }
 
 // SerializeToBytes converts an Ethereum transaction to Cosmos formatted txBytes which allows for
@@ -96,15 +98,19 @@ func SerializeToSdkTx(
 func SerializeToBytes(
 	clientCtx client.Context, signedTx *coretypes.Transaction,
 ) ([]byte, error) {
-	// First, we convert the Ethereum transaction to a Cosmos transaction.
-	cosmosTx, err := SerializeToSdkTx(clientCtx, signedTx)
-	if err != nil {
-		return nil, err
-	}
+	// // First, we convert the Ethereum transaction to a Cosmos transaction.
+	// cosmosTx, err := SerializeToSdkTx(clientCtx, signedTx)
+	// if err != nil {
+	// 	fmt.Println("CONVERTING TO COSMOS TX FAILED" + err.Error())
+	// 	return nil, err
+	// }
+
+	wrappedEthTx := types.NewFromTransaction(signedTx)
 
 	// Then we use the clientCtx.TxConfig.TxEncoder() to encode the Cosmos transaction into bytes.
-	txBytes, err := clientCtx.TxConfig.TxEncoder()(cosmosTx)
+	txBytes, err := evmtypes.EthTxEncodingConfig{}.TxEncoder()(wrappedEthTx)
 	if err != nil {
+		fmt.Println("ENCODING FAILED" + err.Error())
 		return nil, err
 	}
 

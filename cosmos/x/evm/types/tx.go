@@ -22,8 +22,14 @@ package types
 
 import (
 	"errors"
+	"math/big"
 
+	"github.com/cosmos/cosmos-sdk/client"
+	"github.com/cosmos/cosmos-sdk/codec"
+	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
+	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/types/tx/signing"
 
 	"github.com/ethereum/go-ethereum/core"
 	"github.com/ethereum/go-ethereum/core/txpool"
@@ -31,10 +37,15 @@ import (
 	"pkg.berachain.dev/polaris/eth/common"
 	coretypes "pkg.berachain.dev/polaris/eth/core/types"
 	"pkg.berachain.dev/polaris/lib/utils"
+
+	authtx "github.com/cosmos/cosmos-sdk/x/auth/tx"
 )
 
 // WrappedEthereumTransaction defines a Cosmos SDK message for Ethereum transactions.
-var _ sdk.Msg = (*WrappedEthereumTransaction)(nil)
+var (
+	_ sdk.Msg   = (*WrappedEthereumTransaction)(nil)
+	_ sdk.FeeTx = (*WrappedEthereumTransaction)(nil)
+)
 
 // NewFromTransaction sets the transaction data from an `coretypes.Transaction`.
 func NewFromTransaction(tx *coretypes.Transaction) *WrappedEthereumTransaction {
@@ -134,6 +145,27 @@ func (etr *WrappedEthereumTransaction) ValidateBasic() error {
 	return nil
 }
 
+func (etr *WrappedEthereumTransaction) FeeGranter() sdk.AccAddress {
+	return sdk.AccAddress{}
+}
+
+func (etr *WrappedEthereumTransaction) GetFee() sdk.Coins {
+	return sdk.Coins{}
+}
+
+func (etr *WrappedEthereumTransaction) FeePayer() sdk.AccAddress {
+	return sdk.AccAddress{}
+}
+
+func (etr *WrappedEthereumTransaction) GetMsgs() []sdk.Msg {
+	return []sdk.Msg{etr}
+}
+
+// func (etr *WrappedEthereumTransaction) ToProto() client.TxBuilder {
+// 	authtx.WrapTx(etr)
+// 	return nil
+// }
+
 // GetAsEthTx is a helper function to get an EthTx from a sdk.Tx.
 func GetAsEthTx(tx sdk.Tx) *coretypes.Transaction {
 	if len(tx.GetMsgs()) == 0 {
@@ -144,4 +176,124 @@ func GetAsEthTx(tx sdk.Tx) *coretypes.Transaction {
 		return nil
 	}
 	return etr.AsTransaction()
+}
+
+var _ client.TxEncodingConfig = (*EthTxEncodingConfig)(nil)
+
+type EthTxEncodingConfig struct {
+	signer coretypes.Signer
+	cdc    codec.Codec
+}
+
+func NewEthEncodingConfig(chainID *big.Int) *EthTxEncodingConfig {
+	return &EthTxEncodingConfig{
+		signer: coretypes.LatestSignerForChainID(chainID),
+	}
+}
+
+// Encoder
+func (cfg EthTxEncodingConfig) TxEncoder() sdk.TxEncoder {
+	return func(tx sdk.Tx) ([]byte, error) {
+		// If its an ethereum transaction, return the data
+		if ethTx, ok := tx.(*WrappedEthereumTransaction); ok {
+			return ethTx.Data, nil
+		}
+
+		// else its a standard sdk.Tx, so just use the default txEncoder.
+		return authtx.DefaultTxEncoder()(tx)
+	}
+}
+
+func (cfg EthTxEncodingConfig) TxJSONEncoder() sdk.TxEncoder {
+	return func(tx sdk.Tx) ([]byte, error) {
+		if ethTx, ok := tx.(*WrappedEthereumTransaction); ok {
+			bz, err := ethTx.AsTransaction().MarshalJSON()
+			if err == nil {
+				return bz, nil
+			}
+		}
+		return authtx.DefaultJSONTxEncoder(cfg.cdc)(tx)
+	}
+}
+
+// Decoder
+func (cfg EthTxEncodingConfig) TxDecoder() sdk.TxDecoder {
+	return func(txBytes []byte) (sdk.Tx, error) {
+		var ethTx coretypes.Transaction
+		if err := ethTx.UnmarshalBinary(txBytes); err == nil {
+			return &WrappedEthereumTransaction{Data: txBytes}, nil
+		}
+
+		return authtx.DefaultTxDecoder(cfg.cdc)(txBytes)
+	}
+}
+
+func (cfg EthTxEncodingConfig) TxJSONDecoder() sdk.TxDecoder {
+	return func(txBytes []byte) (sdk.Tx, error) {
+		var ethTx coretypes.Transaction
+		if err := ethTx.UnmarshalJSON(txBytes); err == nil {
+			return &WrappedEthereumTransaction{Data: txBytes}, nil
+		}
+
+		return authtx.DefaultJSONTxDecoder(cfg.cdc)(txBytes)
+	}
+}
+
+// Signatures
+
+func (g EthTxEncodingConfig) MarshalSignatureJSON(sigs []signing.SignatureV2) ([]byte, error) {
+	descs := make([]*signing.SignatureDescriptor, len(sigs))
+
+	for i, sig := range sigs {
+		descData := signing.SignatureDataToProto(sig.Data)
+		any, err := codectypes.NewAnyWithValue(sig.PubKey)
+		if err != nil {
+			return nil, err
+		}
+
+		descs[i] = &signing.SignatureDescriptor{
+			PublicKey: any,
+			Data:      descData,
+			Sequence:  sig.Sequence,
+		}
+	}
+
+	toJSON := &signing.SignatureDescriptors{Signatures: descs}
+
+	return codec.ProtoMarshalJSON(toJSON, nil)
+}
+
+func (g EthTxEncodingConfig) UnmarshalSignatureJSON(bz []byte) ([]signing.SignatureV2, error) {
+	var sigDescs signing.SignatureDescriptors
+	err := g.cdc.UnmarshalJSON(bz, &sigDescs)
+	if err != nil {
+		return nil, err
+	}
+
+	sigs := make([]signing.SignatureV2, len(sigDescs.Signatures))
+	for i, desc := range sigDescs.Signatures {
+		pubKey, _ := desc.PublicKey.GetCachedValue().(cryptotypes.PubKey)
+
+		data := signing.SignatureDataFromProto(desc.Data)
+
+		sigs[i] = signing.SignatureV2{
+			PubKey:   pubKey,
+			Data:     data,
+			Sequence: desc.Sequence,
+		}
+	}
+
+	return sigs, nil
+}
+
+func (g EthTxEncodingConfig) NewTxBuilder() client.TxBuilder {
+	return nil
+}
+
+func (g EthTxEncodingConfig) WrapTxBuilder(sdk.Tx) (client.TxBuilder, error) {
+	return nil, nil
+}
+
+func (g EthTxEncodingConfig) SignModeHandler() *txsigning.HandlerMap {
+	return nil
 }

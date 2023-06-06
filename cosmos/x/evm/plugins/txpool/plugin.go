@@ -21,8 +21,9 @@
 package txpool
 
 import (
-	errorsmod "cosmossdk.io/errors"
+	"fmt"
 
+	errorsmod "cosmossdk.io/errors"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -91,10 +92,13 @@ func (p *plugin) SendTx(signedEthTx *coretypes.Transaction) error {
 	syncCtx := p.clientContext.WithBroadcastMode(flags.BroadcastSync)
 	rsp, err := syncCtx.BroadcastTx(txBytes)
 	if rsp != nil && rsp.Code != 0 {
+		fmt.Println("BAD RESPONSE", rsp, rsp.Code)
 		err = errorsmod.ABCIError(rsp.Codespace, rsp.Code, rsp.RawLog)
 	}
 	if err != nil {
-		// b.logger.Error("failed to broadcast tx", "error", err.Errsor())
+		// log.NewCustomLogger(zerlog.).Error("failed to broadcast tx", "error", err.Error())
+		fmt.Println("FAILED TO BROADCAST TX", err.Error())
+		// log.NewLogger().Error("failed to broadcast tx", "error", err.Error())
 		return err
 	}
 

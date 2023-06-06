@@ -48,8 +48,10 @@ import (
 	simappconfig "pkg.berachain.dev/polaris/cosmos/runtime/config"
 	evmante "pkg.berachain.dev/polaris/cosmos/x/evm/ante"
 	evmmempool "pkg.berachain.dev/polaris/cosmos/x/evm/plugins/txpool/mempool"
+	evmtypes "pkg.berachain.dev/polaris/cosmos/x/evm/types"
 
 	_ "embed"
+
 	_ "github.com/cosmos/cosmos-sdk/x/auth/tx/config" // import for side-effects
 )
 
@@ -105,6 +107,7 @@ func NewPolarisApp( //nolint:funlen // as defined by the sdk.
 	var (
 		app          = &PolarisApp{}
 		appBuilder   *runtime.AppBuilder
+		txConfig     = evmtypes.EthTxEncodingConfig{}
 		ethTxMempool = evmmempool.NewPolarisEthereumTxPool()
 		appConfig    = depinject.Configs(
 			AppConfig,
@@ -112,6 +115,7 @@ func NewPolarisApp( //nolint:funlen // as defined by the sdk.
 				app.App,
 				appOpts,
 				logger,
+				txConfig,
 				ethTxMempool,
 				polarisbaseapp.PrecompilesToInject(&app.PolarisBaseApp),
 			),
@@ -145,6 +149,7 @@ func NewPolarisApp( //nolint:funlen // as defined by the sdk.
 		panic(err)
 	}
 
+	app.TxnConfig.TxEncodingConfig = evmtypes.EthTxEncodingConfig{}
 	// Build app with the provided options.
 	app.App = appBuilder.Build(db, traceStore, append(baseAppOptions, baseapp.SetMempool(ethTxMempool))...)
 	// TODO: move this somewhere better, introduce non IAVL enforced module keys as a PR to the SDK
