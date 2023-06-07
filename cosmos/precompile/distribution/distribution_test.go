@@ -100,7 +100,7 @@ func setup() (sdk.Context, *distrkeeper.Keeper, *stakingkeeper.Keeper, *bankkeep
 	err := dk.Params.Set(ctx, params)
 	Expect(err).ToNot(HaveOccurred())
 
-	err = dk.SetFeePool(ctx, distributiontypes.InitialFeePool())
+	err = dk.FeePool.Set(ctx, distributiontypes.InitialFeePool())
 	Expect(err).ToNot(HaveOccurred())
 	return ctx, &dk, &sk, &bk
 }

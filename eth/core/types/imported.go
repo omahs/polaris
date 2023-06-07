@@ -48,6 +48,7 @@ type (
 var (
 	NewLondonSigner        = types.NewLondonSigner
 	BytesToBloom           = types.BytesToBloom
+	CalcUncleHash          = types.CalcUncleHash
 	CreateBloom            = types.CreateBloom
 	MakeSigner             = types.MakeSigner
 	LogsBloom              = types.LogsBloom

@@ -31,6 +31,7 @@ import (
 	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/tx/signing"
+	"google.golang.org/protobuf/reflect/protoreflect"
 
 	"pkg.berachain.dev/polaris/cosmos/crypto/keys/ethsecp256k1"
 	cosmlib "pkg.berachain.dev/polaris/cosmos/lib"
@@ -478,6 +479,8 @@ type mockSdkTx struct {
 func (m *mockSdkTx) ValidateBasic() error { return nil }
 
 func (m *mockSdkTx) GetMsgs() []sdk.Msg { return m.msgs }
+
+func (m *mockSdkTx) GetMsgsV2() ([]protoreflect.ProtoMessage, error) { return nil, nil }
 
 func (m *mockSdkTx) GetSigners() []sdk.AccAddress { return m.signers }
 
