@@ -32,13 +32,16 @@ import (
 	"github.com/magefile/mage/sh"
 )
 
+const (
+	baseHiveDockerPath = "./e2e/hive/"
+)
+
 var (
 	// Variables.
-	baseHiveDockerPath = "./e2e/hive/"
-	hiveClone          = os.Getenv("GOPATH") + "/src/"
-	clonePath          = hiveClone + ".hive-e2e"
-	simulatorsPath     = clonePath + "/simulators/polaris"
-	clientsPath        = clonePath + "/clients/polard"
+	hiveClone      = os.Getenv("GOPATH") + "/src/"
+	clonePath      = hiveClone + ".hive-e2e"
+	simulatorsPath = clonePath + "/simulators/polaris"
+	clientsPath    = clonePath + "/clients/polard"
 )
 
 type Hive mg.Namespace
@@ -94,6 +97,25 @@ func (h Hive) Test(sim, client string) error {
 func (h Hive) TestV(sim, client string) error {
 	return ExecuteInDirectory(clonePath, func(...string) error {
 		return sh.RunV("./hive", "--sim", sim, "--client", client, "--docker.output")
+	}, false)
+}
+
+func (h Hive) View() error {
+	if err := ExecuteInDirectory(clonePath, func(...string) error {
+		LogGreen("Building HiveView...")
+		return sh.RunV("go", "build", "./cmd/hiveview")
+	}, false); err != nil {
+		return err
+	}
+	if err := ExecuteInDirectory(clonePath, func(...string) error {
+		LogGreen("Serving HiveView...")
+		return sh.RunV("./hiveview", "--serve")
+	}, false); err != nil {
+		return err
+	}
+	return ExecuteInDirectory(clonePath, func(...string) error {
+		LogGreen("Serving HiveView...")
+		return sh.RunV("open", "http://[::]:8080/")
 	}, false)
 }
 
